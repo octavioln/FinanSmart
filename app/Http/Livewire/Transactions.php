@@ -27,14 +27,20 @@ class Transactions extends Component
     public $selected_id;
     public $type, $description, $account_id, $category_id, $effective_date, $amount;
 
-    public $savingsModal = false;
+    public $savings_modal = false;
     public $withdrawal_modal = false;
+    public $deposit_modal = false;
+    public $transfer_modal = false;
     public $accounts_withdraw = [];
+    public $accounts_deposit = [];
+    public $from_account_id;
+    public $to_account_id;
 
     /* Inicializa el componente */
     public function mount(): void
     {
         $this->selected_id = 0;
+        $this->accounts_deposit = Account::where('allows_deposits',1)->pluck('name','id');
         $this->accounts_withdraw = Account::where('allows_withdrawal',1)->pluck('name','id');
     }
     
@@ -90,11 +96,20 @@ class Transactions extends Component
         $this->resetUI();
     }
 
+    /* Controla el cierre del modal de retiro de cajero, para reinicar los formularios */
+    public function updatingdeposit_modal(): void
+    {
+        if(!$this->deposit_modal) {
+            return;
+        }
+        $this->resetUI();
+    }
+
     /* Reinicia el formulario */
     public function resetUI(): void
     {
         $attributes = [
-            'description','account_id','category_id' ,'type', 'effective_date','amount'
+            'description','account_id','category_id' ,'type', 'effective_date','amount', 'from_account_id', 'to_account_id'
         ];
 
         foreach ($attributes as $attribute) {
@@ -102,8 +117,11 @@ class Transactions extends Component
         }
 
         $this->open = false;
-        $this->selected_id = 0;
+        $this->savings_modal = false;
         $this->withdrawal_modal = false;
+        $this->deposit_modal = false;
+        $this->transfer_modal = false;
+        $this->selected_id = 0;
     }
 
     /* Realiza la validación de la propiedad */
@@ -177,6 +195,29 @@ class Transactions extends Component
         $this->alert('success', 'Retiro en efectivo registrado.');
     }
 
+    public function saveDeposit(): void
+    {
+        $account = Account::find($this->account_id);
+
+        $validatedData = $this->validate([
+            'amount' => 'required',
+            'account_id' => 'required'
+        ]);
+
+        Transaction::create([
+            'description' => 'Ingreso de recursos a la cuenta de ' . $account->name,
+            'account_id' => $this->account_id,
+            'category_id' => 19,
+            'type' => 'Abono',
+            'effective_date' => $this->effective_date,
+            'amount' => $this->amount
+        ]);
+        $account->updateAvailableAmount('Abono', $this->amount);
+        
+        $this->resetUI();
+        $this->alert('success', 'Retiro en efectivo registrado.');
+    }
+
     public function saveSavings(): void
     {
         $savings_account =  Account::find(3);
@@ -186,6 +227,41 @@ class Transactions extends Component
             'amount' => 'required|max:'.$account->available_amount,
             'account_id' => 'required'
         ]);
+
+        Transaction::create([
+            'description' => 'Cargo por ahorro',
+            'account_id' => $this->account_id,
+            'category_id' => 18,
+            'type' => 'Cargo',
+            'effective_date' => $this->effective_date,
+            'amount' => $this->amount
+        ]);
+
+        Transaction::create([
+            'description' => 'Ingreso de ahorro desde ' . $account->name,
+            'account_id' => $cash->id,
+            'category_id' => 18,
+            'type' => 'Abono',
+            'effective_date' => $this->effective_date,
+            'amount' => $this->amount
+        ]);
+        $account->updateAvailableAmount('Cargo', $this->amount);
+        $savings_account->updateAvailableAmount('Abono', $this->amount);
+        
+        $this->resetUI();
+        $this->alert('success', 'Retiro en efectivo registrado.');
+    }
+
+    public function saveTransfer(): void
+    {
+        $validatedData = $this->validate([
+            'amount' => 'required',
+            'from_account_id' => 'required',
+            'to_account_id' => 'required'
+        ]);
+        
+        $from_account =  Account::find($this->from_account_id);
+        $to_account = Account::find($this->to_account_id);
 
         Transaction::create([
             'description' => 'Cargo por ahorro',

@@ -33,7 +33,6 @@ class Transaction extends Model
             ->join('accounts as a', 'a.id', '=', 't.account_id')
             ->join('categories as c', 'c.id', '=', 't.category_id')
             ->orderBy('t.'.$sort, $direction)
-            ->whereNotIn('t.category_id', [18,19])
             ->where(function ($query) use ($search) {
                 $query->where('t.description', 'like', '%' .$search. '%')
                     ->orWhere('a.name', 'like', '%' .$search. '%')

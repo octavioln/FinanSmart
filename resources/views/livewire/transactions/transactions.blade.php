@@ -8,17 +8,23 @@
     <x-content>
         <div class="py-1 flex items-center">
             <x-button class="mr-2" wire:model="open" wire:click="$set('open', true)">
-                <i class="fa-solid fa-cart-shopping"></i> &nbsp; {{ __('Compra en comercio') }}
+                <i class="fa-solid fa-cash-register"></i> &nbsp; {{ __('Compra') }}
             </x-button>
             <!--<x-button class="mr-2">
                 <i class="fa-brands fa-amazon"></i> &nbsp; {{ __('Pago de suscripción') }}
             </x-button>-->
             <x-button class="mr-2" wire:model="withdrawal_modal" wire:click="$set('withdrawal_modal', true)">
-                <i class="fa-solid fa-money-bills"></i> &nbsp; {{ __('Retiro en cajero') }}
+                <i class="fa-solid fa-money-bills"></i> &nbsp; {{ __('Retiro') }}
             </x-button>
-            <!--<x-button class="mr-2">
-                <i class="fa-solid fa-circle-dollar-to-slot"></i> &nbsp; {{ __('Registrar depósito') }}
-            </x-button>-->
+            <x-button class="mr-2" wire:model="deposit_modal" wire:click="$set('deposit_modal', true)">
+                <i class="fa-solid fa-circle-dollar-to-slot"></i> &nbsp; {{ __('Depósito') }}
+            </x-button>
+            <x-button class="mr-2" wire:model="savings_modal" wire:click="$set('savings_modal', true)">
+                <i class="fa-solid fa-piggy-bank"></i> &nbsp; {{ __('Ahorro') }}
+            </x-button>
+            <x-button class="mr-2" wire:model="transfer_modal" wire:click="$set('transfer_modal', true)">
+                <i class="fa-solid fa-money-bill-transfer"></i> &nbsp; {{ __('Transferir') }}
+            </x-button>
         </div>
         <div class="py-3 flex items-center">
             <x-input class="flex-1 mr-2" type="text" wire:model='search' placeholder="Buscar..." />
@@ -27,18 +33,6 @@
             <table class="w-full text-sm text-left text-gray-500">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                     <tr>
-                        <th scope="col" class="w-24 cursor-pointer px-6 py-3" wire:click="order('id')">
-                            ID
-                            @if ($sort == 'id')
-                                @if ($direction == 'ASC')
-                                    <i class="fa-solid fa-sort-up float-right "></i>
-                                @else
-                                    <i class="fa-solid fa-sort-down float-right "></i>
-                                @endif
-                            @else
-                                <i class="fa-solid fa-sort float-right "></i>
-                            @endif
-                        </th>
                         <th scope="col" class="w-24 cursor-pointer px-6 py-3 " wire:click="order('effective_date')">
                             Fecha
                             @if ($sort == 'effective_date')
@@ -98,9 +92,6 @@
                 <tbody>
                     @foreach($transactions as $item)
                     <tr>
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                            {{$item->id}}
-                        </th>
                         <td class="px-6 py-4   justify-center">
                             {{ date('d/m/Y', strtotime($item->effective_date)) }}
                         </td>
@@ -138,4 +129,5 @@
     </x-content>
     @include('livewire.transactions.form')
     @include('livewire.transactions.withdraw')
+    @include('livewire.transactions.deposit')
 </div>

@@ -1,7 +1,7 @@
 <div>
     <x-dialog-modal wire:model="open">
         <x-slot name="title">
-            {{ $selected_id > 0 ? 'Editar registro' : 'Agregar registro'}}
+            Registrar compra
         </x-slot>
 
         <x-slot name="content">
