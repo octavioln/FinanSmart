@@ -27,12 +27,17 @@ class Transactions extends Component
     public $selected_id;
     public $type, $description, $account_id, $category_id, $effective_date, $amount;
 
+    public $savingsModal = false;
+    public $withdrawal_modal = false;
+    public $accounts_withdraw = [];
+
     /* Inicializa el componente */
     public function mount(): void
     {
         $this->selected_id = 0;
+        $this->accounts_withdraw = Account::where('allows_withdrawal',1)->pluck('name','id');
     }
-
+    
     /* Reglas de validación */
     public function rules(): array
     {
@@ -76,6 +81,15 @@ class Transactions extends Component
         $this->resetUI();
     }
 
+    /* Controla el cierre del modal de retiro de cajero, para reinicar los formularios */
+    public function updatingwithdrawal_modal(): void
+    {
+        if(!$this->withdrawal_modal) {
+            return;
+        }
+        $this->resetUI();
+    }
+
     /* Reinicia el formulario */
     public function resetUI(): void
     {
@@ -89,6 +103,7 @@ class Transactions extends Component
 
         $this->open = false;
         $this->selected_id = 0;
+        $this->withdrawal_modal = false;
     }
 
     /* Realiza la validación de la propiedad */
@@ -100,28 +115,99 @@ class Transactions extends Component
     /* Renderiza la vists */
     public function render()
     {
-        $accounts = Account::pluck('name','id');
-        $categories = Category::pluck('name','id');
+        $accounts = Account::where('allows_purchases', 1)->pluck('name','id');
+        $categories = Category::whereNotIn('id', [18,19])->pluck('name','id');
         $transactions = Transaction::getAll($this->search, $this->sort, $this->direction);
         return view('livewire.transactions.transactions', compact('accounts', 'categories', 'transactions'));
     }
 
     public function save(): void
     {
-        $this->validate();
-        Transaction::create([
-            'description' => $this->description,
-            'account_id' => $this->account_id,
-            'category_id' => $this->category_id,
-            'type' => $this->type,
-            'effective_date' => $this->effective_date,
-            'amount' => $this->amount
+        $this->type = 'Cargo';
+
+        $validatedData = $this->validate([
+            'description' => 'required',
+            'account_id' => 'required',
+            'category_id' => 'required',
+            'type' => 'required',
+            'effective_date' => 'required',
+            'amount' => 'required',
         ]);
+
+        Transaction::create($validatedData);
 
         $account = Account::find($this->account_id);
         $account->updateAvailableAmount($this->type, $this->amount);
         
         $this->resetUI();
         $this->alert('success', 'Transacción registrada satisfactoriamente');
+    }
+
+    public function saveWithdraw(): void
+    {
+        $cash =  Account::find(1);
+        $account = Account::find($this->account_id);
+
+        $validatedData = $this->validate([
+            'amount' => 'required|max:'.$account->available_amount,
+            'account_id' => 'required'
+        ]);
+
+        Transaction::create([
+            'description' => 'Retiro de efectivo',
+            'account_id' => $this->account_id,
+            'category_id' => 18,
+            'type' => 'Cargo',
+            'effective_date' => $this->effective_date,
+            'amount' => $this->amount
+        ]);
+
+        Transaction::create([
+            'description' => 'Efectivo obtenido por Retiro en cajero',
+            'account_id' => $cash->id,
+            'category_id' => 18,
+            'type' => 'Abono',
+            'effective_date' => $this->effective_date,
+            'amount' => $this->amount
+        ]);
+        $account->updateAvailableAmount('Cargo', $this->amount);
+        $cash->updateAvailableAmount('Abono', $this->amount);
+        
+        $this->resetUI();
+        $this->alert('success', 'Retiro en efectivo registrado.');
+    }
+
+    public function saveSavings(): void
+    {
+        $savings_account =  Account::find(3);
+        $account = Account::find($this->account_id);
+
+        $validatedData = $this->validate([
+            'amount' => 'required|max:'.$account->available_amount,
+            'account_id' => 'required'
+        ]);
+
+        Transaction::create([
+            'description' => 'Cargo por ahorro',
+            'account_id' => $this->account_id,
+            'category_id' => 18,
+            'type' => 'Cargo',
+            'effective_date' => $this->effective_date,
+            'amount' => $this->amount
+        ]);
+
+        Transaction::create([
+            'description' => 'Ingreso de ahorro desde ' . $account->name,
+            'account_id' => $cash->id,
+            'category_id' => 18,
+            'type' => 'Abono',
+            'effective_date' => $this->effective_date,
+            'amount' => $this->amount
+        ]);
+        $account->updateAvailableAmount('Cargo', $this->amount);
+        $savings_account->updateAvailableAmount('Abono', $this->amount);
+        
+        $this->resetUI();
+        $this->alert('success', 'Retiro en efectivo registrado.');
     }
 }

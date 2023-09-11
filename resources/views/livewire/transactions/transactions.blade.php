@@ -6,11 +6,22 @@
 </x-slot>
 <div>
     <x-content>
-        <div class="px-6 py-4 flex items-center">
-            <x-input class="flex-1 mr-4" type="text" wire:model='search' placeholder="Buscar..." />
-            <x-button wire:model="open" wire:click="$set('open', true)">
-                {{ __('Agregar') }}
+        <div class="py-1 flex items-center">
+            <x-button class="mr-2" wire:model="open" wire:click="$set('open', true)">
+                <i class="fa-solid fa-cart-shopping"></i> &nbsp; {{ __('Compra en comercio') }}
             </x-button>
+            <!--<x-button class="mr-2">
+                <i class="fa-brands fa-amazon"></i> &nbsp; {{ __('Pago de suscripción') }}
+            </x-button>-->
+            <x-button class="mr-2" wire:model="withdrawal_modal" wire:click="$set('withdrawal_modal', true)">
+                <i class="fa-solid fa-money-bills"></i> &nbsp; {{ __('Retiro en cajero') }}
+            </x-button>
+            <!--<x-button class="mr-2">
+                <i class="fa-solid fa-circle-dollar-to-slot"></i> &nbsp; {{ __('Registrar depósito') }}
+            </x-button>-->
+        </div>
+        <div class="py-3 flex items-center">
+            <x-input class="flex-1 mr-2" type="text" wire:model='search' placeholder="Buscar..." />
         </div>
         @if ($transactions->count())
             <table class="w-full text-sm text-left text-gray-500">
@@ -67,7 +78,7 @@
                                 <i class="fa-solid fa-sort float-right "></i>
                             @endif
                         </th>
-                        <th scope="col" class="w-24 cursor-pointer px-6 py-3 " wire:click="order('amount')">
+                        <th scope="col" class="w-50 cursor-pointer px-6 py-3 " wire:click="order('amount')">
                             Monto
                             @if ($sort == 'amount')
                                 @if ($direction == 'ASC')
@@ -79,9 +90,9 @@
                                 <i class="fa-solid fa-sort float-right "></i>
                             @endif
                         </th>
-                        <th scope="col" class="px-6 py-3 text-center">
+                        <!--<th scope="col" class="px-6 py-3 text-center">
                         Acción
-                        </th>
+                        </th>-->
                     </tr>
                 </thead>
                 <tbody>
@@ -102,14 +113,14 @@
                         <td class="px-6 py-4 justify-center ">
                             {{$item->type}}
                         </td>
-                        <td class="px-6 py-4 right">
+                        <td class="px-6 py-4 justify-center">
                             {{$item->amount}}
                         </td>
-                        <td class="px-6 py-4 flex justify-center">
+                        <!--<td class="px-6 py-4 flex justify-center">
                             <x-danger-button class="mr-3">
                                 <i class="fa-solid fa-trash"></i>
                             </x-danger-button>   
-                        </td>
+                        </td> -->
                     </tr>
                     @endforeach
                 </tbody>
@@ -126,4 +137,5 @@
         @endif
     </x-content>
     @include('livewire.transactions.form')
+    @include('livewire.transactions.withdraw')
 </div>

@@ -97,5 +97,15 @@ class CategorySeeder extends Seeder
             "name" => 'Otro',
             "description" => "Otro tipo de gasto que normalmente no está contemplado",
         ]);
+
+        Category::create([
+            "name" => 'Traspaso entre cuentas',
+            "description" => "De débito a ahorro, de ahorro a débito, de débito a efectivo",
+        ]);
+
+        Category::create([
+            "name" => 'Depósito',
+            "description" => "De débito a ahorro, de ahorro a débito, de débito a efectivo",
+        ]);
     }
 }
