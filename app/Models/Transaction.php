@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Transaction extends Model
 {
@@ -15,8 +16,28 @@ class Transaction extends Model
 
     protected $fillable = [
         'description',
+        'account_id',
         'category_id',
+        'type',
         'effective_date',
         'amount'
     ];
+
+    /**
+     * Obtiene todos los registros para llenar la tabla del componente "Transactions"
+     */
+    public static function getAll($search, $sort, $direction)
+    {
+        return DB::table('transactions as t')
+            ->select('t.*', 'a.name as account_name', 'c.name as category_name')
+            ->join('accounts as a', 'a.id', '=', 't.account_id')
+            ->join('categories as c', 'c.id', '=', 't.category_id')
+            ->orderBy('t.'.$sort, $direction)
+            ->where(function ($query) use ($search) {
+                $query->where('t.description', 'like', '%' .$search. '%')
+                    ->orWhere('a.name', 'like', '%' .$search. '%')
+                    ->orWhere('c.name', 'like', '%' .$search. '%');
+            })
+            ->paginate(10);
+    }
 }

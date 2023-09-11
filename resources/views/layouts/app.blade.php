@@ -13,13 +13,16 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/flowbite.min.css" rel="stylesheet" />
 
         <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/main.js'])
         <script src="https://kit.fontawesome.com/bc4fe23828.js" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/flowbite.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
         <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <!-- Styles -->
         @livewireStyles
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/pikaday/css/pikaday.css">
     </head>
     <body class="font-sans antialiased">
         <x-banner />

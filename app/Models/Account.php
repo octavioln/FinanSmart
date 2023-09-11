@@ -19,4 +19,25 @@ class Account extends Model
         'description',
         'available_amount'
     ];
+
+    /**
+     * Actualiza el monto disponible en la cuenta
+     * @param string $type: Tipo de transacción
+     * @param float $amount: Monto a actualizar
+     */
+    public function updateAvailableAmount($type, $amount): void
+    {
+        switch ($type) {
+            case 'Cargo':
+                $this->available_amount -= $amount;
+                $this->save();
+                break;
+            case 'Abono':
+                $this->available_amount += $amount;
+                $this->save();
+                break;
+            default:
+                break;
+        }
+    }
 }
