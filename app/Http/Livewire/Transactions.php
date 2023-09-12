@@ -31,6 +31,7 @@ class Transactions extends Component
     public $withdrawal_modal = false;
     public $deposit_modal = false;
     public $transfer_modal = false;
+    public $suscriptions_modal = false;
     public $accounts_withdraw = [];
     public $accounts_deposit = [];
     public $from_account_id;
@@ -121,6 +122,7 @@ class Transactions extends Component
         $this->withdrawal_modal = false;
         $this->deposit_modal = false;
         $this->transfer_modal = false;
+        $this->suscriptions_modal = false;
         $this->selected_id = 0;
     }
 
