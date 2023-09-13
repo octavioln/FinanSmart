@@ -40,4 +40,17 @@ class Transaction extends Model
             })
             ->paginate(10);
     }
+
+    /**
+     * Obtiene las últimas 10 transacciones que utiliza el componente Dashboard
+     */
+    public static function getMostRecent()
+    {
+        return DB::table('transactions as t')
+            ->select('t.*', 'a.name as account_name', 'c.name as category_name')
+            ->join('accounts as a', 'a.id', '=', 't.account_id')
+            ->join('categories as c', 'c.id', '=', 't.category_id')
+            ->orderBy('t.id', 'DESC')
+            ->paginate(5);
+    }
 }

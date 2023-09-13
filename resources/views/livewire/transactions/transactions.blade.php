@@ -15,14 +15,6 @@
                 <div class="tooltip-arrow" data-popper-arrow></div>
             </div>
 
-            <!--<x-button data-tooltip-target="tooltip-suscriptions" class="mr-2">
-                <i class="fa-brands fa-amazon fa-2x"></i> 
-            </x-button>
-            <div id="tooltip-suscriptions" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip">
-                Suscripciones
-                <div class="tooltip-arrow" data-popper-arrow></div>
-            </div>-->
-
             <x-button data-tooltip-target="tooltip-withdrawal"  class="mr-2" wire:model="withdrawal_modal" wire:click="$set('withdrawal_modal', true)">
                 <i class="fa-solid fa-money-bills fa-2x"></i>
             </x-button>
@@ -47,13 +39,13 @@
                 <div class="tooltip-arrow" data-popper-arrow></div>
             </div>
 
-            <!--<x-button data-tooltip-target="tooltip-transfer" class="mr-2" wire:model="transfer_modal" wire:click="$set('transfer_modal', true)">
+            <x-button data-tooltip-target="tooltip-transfer" class="mr-2" wire:model="transfer_modal" wire:click="$set('transfer_modal', true)">
                 <i class="fa-solid fa-money-bill-transfer fa-2x"></i> 
             </x-button>
             <div id="tooltip-transfer" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip">
                 Transferir entre cuentas
                 <div class="tooltip-arrow" data-popper-arrow></div>
-            </div>-->
+            </div>
 
         </div>
         <div class="py-3 flex items-center">
@@ -103,6 +95,9 @@
                                 <i class="fa-solid fa-sort float-right "></i>
                             @endif
                         </th>
+                        <th scope="col" class="px-6 py-3">
+                            Cuenta
+                        </th>
                         <th scope="col" class="cursor-pointer px-6 py-3 " wire:click="order('amount')">
                             Monto
                             @if ($sort == 'amount')
@@ -132,7 +127,10 @@
                         <td class="px-6 py-4 justify-center ">
                             {{$item->type}}
                         </td>
-                        <td class="px-6 py-4 justify-center">
+                        <td class="px-6 py-4 justify-center ">
+                            {{$item->account_name}}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right">
                             {{ number_format($item->amount, 2) }}
                         </td>
                     </tr>
@@ -154,4 +152,6 @@
     @include('livewire.transactions.form')
     @include('livewire.transactions.withdraw')
     @include('livewire.transactions.deposit')
+    @include('livewire.transactions.savings')
+    @include('livewire.transactions.transfer')
 </div>

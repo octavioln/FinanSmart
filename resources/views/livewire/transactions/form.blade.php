@@ -6,7 +6,7 @@
 
         <x-slot name="content">
 
-        <div class="mb-4">
+            <div class="mb-4">
                 <x-label value="Categoría" class="mb-2" />
                 <select wire:model="category_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                     <option value="" seledted>Seleccione</option>

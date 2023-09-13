@@ -34,6 +34,7 @@ class Transactions extends Component
     public $suscriptions_modal = false;
     public $accounts_withdraw = [];
     public $accounts_deposit = [];
+    public $accounts_transfer = [];
     public $from_account_id;
     public $to_account_id;
 
@@ -43,6 +44,7 @@ class Transactions extends Component
         $this->selected_id = 0;
         $this->accounts_deposit = Account::where('allows_deposits',1)->pluck('name','id');
         $this->accounts_withdraw = Account::where('allows_withdrawal',1)->pluck('name','id');
+        $this->accounts_transfer = Account::where('allows_transfers',1)->pluck('name','id');
     }
     
     /* Reglas de validación */
@@ -231,9 +233,9 @@ class Transactions extends Component
         ]);
 
         Transaction::create([
-            'description' => 'Cargo por ahorro',
+            'description' => 'Traspaso de fondos hacia ' . $savings_account->name,
             'account_id' => $this->account_id,
-            'category_id' => 18,
+            'category_id' => 8,
             'type' => 'Cargo',
             'effective_date' => $this->effective_date,
             'amount' => $this->amount
@@ -241,8 +243,8 @@ class Transactions extends Component
 
         Transaction::create([
             'description' => 'Ingreso de ahorro desde ' . $account->name,
-            'account_id' => $cash->id,
-            'category_id' => 18,
+            'account_id' => $savings_account->id,
+            'category_id' => 19,
             'type' => 'Abono',
             'effective_date' => $this->effective_date,
             'amount' => $this->amount
@@ -251,7 +253,7 @@ class Transactions extends Component
         $savings_account->updateAvailableAmount('Abono', $this->amount);
         
         $this->resetUI();
-        $this->alert('success', 'Retiro en efectivo registrado.');
+        $this->alert('success', 'Ahorro registrado.');
     }
 
     public function saveTransfer(): void
@@ -266,8 +268,8 @@ class Transactions extends Component
         $to_account = Account::find($this->to_account_id);
 
         Transaction::create([
-            'description' => 'Cargo por ahorro',
-            'account_id' => $this->account_id,
+            'description' => 'Traspaso de fondos hacia ' . $to_account->name,
+            'account_id' => $from_account->id,
             'category_id' => 18,
             'type' => 'Cargo',
             'effective_date' => $this->effective_date,
@@ -275,15 +277,15 @@ class Transactions extends Component
         ]);
 
         Transaction::create([
-            'description' => 'Ingreso de ahorro desde ' . $account->name,
-            'account_id' => $cash->id,
+            'description' => 'Ingreso de ahorro desde ' . $from_account->name,
+            'account_id' => $to_account->id,
             'category_id' => 18,
             'type' => 'Abono',
             'effective_date' => $this->effective_date,
             'amount' => $this->amount
         ]);
-        $account->updateAvailableAmount('Cargo', $this->amount);
-        $savings_account->updateAvailableAmount('Abono', $this->amount);
+        $from_account->updateAvailableAmount('Cargo', $this->amount);
+        $to_account->updateAvailableAmount('Abono', $this->amount);
         
         $this->resetUI();
         $this->alert('success', 'Retiro en efectivo registrado.');
