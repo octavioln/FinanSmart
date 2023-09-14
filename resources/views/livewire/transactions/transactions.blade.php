@@ -15,6 +15,14 @@
                 <div class="tooltip-arrow" data-popper-arrow></div>
             </div>
 
+            <x-button data-tooltip-target="tooltip-subscriptions" class="mr-2" wire:model="subscriptions_modal" wire:click="$set('subscriptions_modal', true)">
+                <i class="fa-solid fa-clock-rotate-left fa-2x"></i>
+            </x-button>
+            <div id="tooltip-subscriptions" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip">
+                Pago suscripción
+                <div class="tooltip-arrow" data-popper-arrow></div>
+            </div>
+
             <x-button data-tooltip-target="tooltip-withdrawal"  class="mr-2" wire:model="withdrawal_modal" wire:click="$set('withdrawal_modal', true)">
                 <i class="fa-solid fa-money-bills fa-2x"></i>
             </x-button>
@@ -154,4 +162,5 @@
     @include('livewire.transactions.deposit')
     @include('livewire.transactions.savings')
     @include('livewire.transactions.transfer')
+    @include('livewire.transactions.subscriptions')
 </div>

@@ -11,6 +11,7 @@ use Jantinnerezo\LivewireAlert\LivewireAlert;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\Transaction;
+use App\Models\Subscription;
 
 /**
  * Componente para el manejo de las transacciones
@@ -31,12 +32,14 @@ class Transactions extends Component
     public $withdrawal_modal = false;
     public $deposit_modal = false;
     public $transfer_modal = false;
-    public $suscriptions_modal = false;
+    public $subscriptions_modal = false;
     public $accounts_withdraw = [];
     public $accounts_deposit = [];
     public $accounts_transfer = [];
+    public $subscriptions = [];
     public $from_account_id;
     public $to_account_id;
+    public $subscription_id;
 
     /* Inicializa el componente */
     public function mount(): void
@@ -45,6 +48,7 @@ class Transactions extends Component
         $this->accounts_deposit = Account::where('allows_deposits',1)->pluck('name','id');
         $this->accounts_withdraw = Account::where('allows_withdrawal',1)->pluck('name','id');
         $this->accounts_transfer = Account::where('allows_transfers',1)->pluck('name','id');
+        $this->subscriptions = Subscription::pluck('name','id');
     }
     
     /* Reglas de validación */
@@ -112,7 +116,7 @@ class Transactions extends Component
     public function resetUI(): void
     {
         $attributes = [
-            'description','account_id','category_id' ,'type', 'effective_date','amount', 'from_account_id', 'to_account_id'
+            'description','account_id','category_id' ,'type', 'effective_date','amount', 'from_account_id', 'to_account_id', 'subscription_id'
         ];
 
         foreach ($attributes as $attribute) {
@@ -124,7 +128,7 @@ class Transactions extends Component
         $this->withdrawal_modal = false;
         $this->deposit_modal = false;
         $this->transfer_modal = false;
-        $this->suscriptions_modal = false;
+        $this->subscriptions_modal = false;
         $this->selected_id = 0;
     }
 
@@ -134,7 +138,7 @@ class Transactions extends Component
         $this->validateOnly($propertyName);
     }
 
-    /* Renderiza la vists */
+    /* Renderiza la vista */
     public function render()
     {
         $accounts = Account::where('allows_purchases', 1)->pluck('name','id');
@@ -172,7 +176,8 @@ class Transactions extends Component
 
         $validatedData = $this->validate([
             'amount' => 'required|max:'.$account->available_amount,
-            'account_id' => 'required'
+            'account_id' => 'required',
+            'effective_date' => 'required'
         ]);
 
         Transaction::create([
@@ -205,7 +210,8 @@ class Transactions extends Component
 
         $validatedData = $this->validate([
             'amount' => 'required',
-            'account_id' => 'required'
+            'account_id' => 'required',
+            'effective_date' => 'required'
         ]);
 
         Transaction::create([
@@ -219,7 +225,7 @@ class Transactions extends Component
         $account->updateAvailableAmount('Abono', $this->amount);
         
         $this->resetUI();
-        $this->alert('success', 'Retiro en efectivo registrado.');
+        $this->alert('success', 'Depósito registrado.');
     }
 
     public function saveSavings(): void
@@ -229,7 +235,8 @@ class Transactions extends Component
 
         $validatedData = $this->validate([
             'amount' => 'required|max:'.$account->available_amount,
-            'account_id' => 'required'
+            'account_id' => 'required',
+            'effective_date' => 'required'
         ]);
 
         Transaction::create([
@@ -261,7 +268,8 @@ class Transactions extends Component
         $validatedData = $this->validate([
             'amount' => 'required',
             'from_account_id' => 'required',
-            'to_account_id' => 'required'
+            'to_account_id' => 'required',
+            'effective_date' => 'required'
         ]);
         
         $from_account =  Account::find($this->from_account_id);
@@ -288,6 +296,32 @@ class Transactions extends Component
         $to_account->updateAvailableAmount('Abono', $this->amount);
         
         $this->resetUI();
-        $this->alert('success', 'Retiro en efectivo registrado.');
+        $this->alert('success', 'Transferencia registrada.');
+    }
+
+    public function saveSubscription(): void
+    {
+        $validatedData = $this->validate([
+            'subscription_id' => 'required',
+            'effective_date' => 'required'
+        ]);
+
+        $subscription = Subscription::find($this->subscription_id);
+        
+        $account =  Account::find($subscription->account_id);
+
+        Transaction::create([
+            'description' => $subscription->name,
+            'account_id' => $subscription->account_id,
+            'category_id' => $subscription->category_id,
+            'type' => 'Cargo',
+            'effective_date' => $this->effective_date,
+            'amount' => $subscription->amount
+        ]);
+
+        $account->updateAvailableAmount('Cargo', $subscription->amount);
+        
+        $this->resetUI();
+        $this->alert('success', 'Pago de suscripción registrado.');
     }
 }
