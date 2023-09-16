@@ -41,6 +41,10 @@ class Transactions extends Component
     public $to_account_id;
     public $subscription_id;
 
+    protected $listeners = [
+        'deleteConfirmed' => 'destroy'
+    ];
+
     /* Inicializa el componente */
     public function mount(): void
     {
@@ -323,5 +327,26 @@ class Transactions extends Component
         
         $this->resetUI();
         $this->alert('success', 'Pago de suscripción registrado.');
+    }
+
+    public function deleteConfimation($id)
+    {
+        $this->selected_id  = $id;
+        $this->dispatchBrowserEvent('show-alert');
+    }
+
+    public function destroy()
+    {
+        /* Obtener el registro */
+        $tr = Transaction::where('id', $this->selected_id )->first();
+        
+        /* Actualizar el monto disponible en cuenta */
+        $account = Account::find($tr->account_id);
+        $account->updateAvailableAmount('Abono', $tr->amount);
+
+        /* Procedemos a eliminar */
+        $tr->delete();
+        $this->resetUI();
+        $this->alert('success', 'Registro eliminado con éxito.');
     }
 }

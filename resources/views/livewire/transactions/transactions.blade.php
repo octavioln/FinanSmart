@@ -91,18 +91,6 @@
                                 <i class="fa-solid fa-sort float-right "></i>
                             @endif
                         </th>
-                        <th scope="col" class="cursor-pointer px-6 py-3 " wire:click="order('type')">
-                            Tipo
-                            @if ($sort == 'type')
-                                @if ($direction == 'ASC')
-                                    <i class="fa-solid fa-sort-up float-right "></i>
-                                @else
-                                    <i class="fa-solid fa-sort-down float-right "></i>
-                                @endif
-                            @else
-                                <i class="fa-solid fa-sort float-right "></i>
-                            @endif
-                        </th>
                         <th scope="col" class="px-6 py-3">
                             Cuenta
                         </th>
@@ -117,6 +105,9 @@
                             @else
                                 <i class="fa-solid fa-sort float-right "></i>
                             @endif
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            Acción
                         </th>
                     </tr>
                 </thead>
@@ -133,13 +124,15 @@
                             {{$item->category_name}}
                         </td>
                         <td class="px-6 py-4 justify-center ">
-                            {{$item->type}}
-                        </td>
-                        <td class="px-6 py-4 justify-center ">
                             {{$item->account_name}}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right">
-                            {{ number_format($item->amount, 2) }}
+                        <td class="px-6 py-4 text-right whitespace-nowrap {{$item->type == 'Abono' ? 'text-green-500' : 'text-red-600'}} ">
+                            {{$item->type == 'Cargo' ? '-' : ''}}  ${{ number_format($item->amount, 2) }}
+                        </td>
+                        <td class="px-6 py-4 justify-center ">
+                            <x-danger-button class="mr-3" wire:click.prevent='deleteConfimation({{$item->id}})'>
+                                <i class="fa-solid fa-trash"></i>
+                            </x-danger-button>
                         </td>
                     </tr>
                     @endforeach

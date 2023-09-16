@@ -33,6 +33,7 @@ class Transaction extends Model
             ->join('accounts as a', 'a.id', '=', 't.account_id')
             ->join('categories as c', 'c.id', '=', 't.category_id')
             ->orderBy('t.'.$sort, $direction)
+            ->whereNull('t.deleted_at')
             ->where(function ($query) use ($search) {
                 $query->where('t.description', 'like', '%' .$search. '%')
                     ->orWhere('a.name', 'like', '%' .$search. '%')
@@ -50,6 +51,7 @@ class Transaction extends Model
             ->select('t.*', 'a.name as account_name', 'c.name as category_name')
             ->join('accounts as a', 'a.id', '=', 't.account_id')
             ->join('categories as c', 'c.id', '=', 't.category_id')
+            ->whereNull('t.deleted_at')
             ->orderBy('t.id', 'DESC')
             ->paginate(5);
     }
