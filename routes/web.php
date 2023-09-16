@@ -28,4 +28,5 @@ Route::middleware([
     Route::get('dashboard', \App\Http\Livewire\Dashboard::class)->name('dashboard'); 
     Route::get('transactions', \App\Http\Livewire\Transactions::class)->name('transactions');
     Route::get('subscriptions', \App\Http\Livewire\Subscriptions::class)->name('subscriptions');
+    Route::get('budgets', \App\Http\Livewire\Budgets::class)->name('budgets');
 });

@@ -21,6 +21,9 @@
                     <x-nav-link href="{{ route('subscriptions') }}" :active="request()->routeIs('subscriptions')">
                         {{ __('Suscripciones') }}
                     </x-nav-link>
+                    <x-nav-link href="{{ route('budgets') }}" :active="request()->routeIs('budgets')">
+                        {{ __('Presupuestos') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -153,6 +156,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link href="{{ route('subscriptions') }}" :active="request()->routeIs('subscriptions')">
                 {{ __('Suscripciones') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link href="{{ route('budgets') }}" :active="request()->routeIs('budgets')">
+                {{ __('Presupuestos') }}
             </x-responsive-nav-link>
         </div>
 
