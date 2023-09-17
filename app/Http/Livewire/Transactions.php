@@ -146,7 +146,7 @@ class Transactions extends Component
     public function render()
     {
         $accounts = Account::where('allows_purchases', 1)->pluck('name','id');
-        $categories = Category::whereNotIn('id', [18,19])->pluck('name','id');
+        $categories = Category::pluck('name','id');
         $transactions = Transaction::getAll($this->search, $this->sort, $this->direction);
         return view('livewire.transactions.transactions', compact('accounts', 'categories', 'transactions'));
     }
@@ -171,6 +171,55 @@ class Transactions extends Component
         
         $this->resetUI();
         $this->alert('success', 'Transacción registrada satisfactoriamente');
+    }
+
+    /* Muestra el formulario para editar un registro */
+    public function edit($id)
+    {
+        $tr = Transaction::find($id);
+        $this->description = $tr->description;
+        $this->account_id = $tr->account_id;
+        $this->category_id = $tr->category_id;
+        $this->type = $tr->type;
+        $this->effective_date = $tr->effective_date;
+        $this->amount = $tr->amount;
+        $this->selected_id = $tr->id;
+        $this->open = true;
+    }
+
+    /* Realiza la actualización de un registro */
+    public function update()
+    {
+        $tr = Transaction::find($this->selected_id);
+        
+        $validatedData = $this->validate([
+            'description' => 'required',
+            'account_id' => 'required',
+            'category_id' => 'required',
+            'effective_date' => 'required',
+            'amount' => 'required',
+        ]);
+
+        /* Si las cuentas son distintas se retira el monto anterior y se guarda el nuevo */
+        if($tr->account_id != $this->account_id){
+            $former_account = Account::find($tr->account_id);
+            $former_account->updateAvailableAmount('Abono', $tr->amount);
+
+            $new_account = Account::find($this->account_id);
+            $new_account->updateAvailableAmount('Cargo', $this->amount);
+        }
+
+        /* Se revisa las diferencias para actualizar el monto disponible en la cuenta */
+        else{
+            $difference = $tr->amount - $this->amount;
+            $account = Account::find($this->account_id);
+            $account->updateAvailableAmount( ($difference < 0 ? 'Cargo' : 'Abono'), abs($difference) );
+        }
+
+        $tr->update($validatedData);
+
+        $this->resetUI();
+        $this->alert('success', 'Transacción modificada satisfactoriamente');
     }
 
     public function saveWithdraw(): void

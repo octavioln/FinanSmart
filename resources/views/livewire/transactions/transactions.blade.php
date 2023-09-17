@@ -8,7 +8,7 @@
     <x-content>
         <div class="py-1 flex items-center">
             <x-button data-tooltip-target="tooltip-open" class="mr-2" wire:model="open" wire:click="$set('open', true)">
-                <i class="fa-solid fa-cash-register fa-2x"></i>
+                <i class="fa-solid fa-cash-register"></i>
             </x-button>
             <div id="tooltip-open" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip">
                 Registrar compra
@@ -16,7 +16,7 @@
             </div>
 
             <x-button data-tooltip-target="tooltip-subscriptions" class="mr-2" wire:model="subscriptions_modal" wire:click="$set('subscriptions_modal', true)">
-                <i class="fa-solid fa-clock-rotate-left fa-2x"></i>
+                <i class="fa-solid fa-clock-rotate-left"></i>
             </x-button>
             <div id="tooltip-subscriptions" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip">
                 Pago suscripción
@@ -24,7 +24,7 @@
             </div>
 
             <x-button data-tooltip-target="tooltip-withdrawal"  class="mr-2" wire:model="withdrawal_modal" wire:click="$set('withdrawal_modal', true)">
-                <i class="fa-solid fa-money-bills fa-2x"></i>
+                <i class="fa-solid fa-money-bills"></i>
             </x-button>
             <div id="tooltip-withdrawal" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip">
                 Retiro de cajero
@@ -32,7 +32,7 @@
             </div>
 
             <x-button data-tooltip-target="tooltip-deposit" class="mr-2" wire:model="deposit_modal" wire:click="$set('deposit_modal', true)">
-                <i class="fa-solid fa-circle-dollar-to-slot fa-2x"></i> 
+                <i class="fa-solid fa-circle-dollar-to-slot"></i> 
             </x-button>
             <div id="tooltip-deposit" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip">
                 Deposito a cuenta
@@ -40,7 +40,7 @@
             </div>
 
             <x-button data-tooltip-target="tooltip-savings" class="mr-2" wire:model="savings_modal" wire:click="$set('savings_modal', true)">
-                <i class="fa-solid fa-piggy-bank fa-2x"></i>  
+                <i class="fa-solid fa-piggy-bank"></i>  
             </x-button>
             <div id="tooltip-savings" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip">
                 Registrar ahorro
@@ -48,7 +48,7 @@
             </div>
 
             <x-button data-tooltip-target="tooltip-transfer" class="mr-2" wire:model="transfer_modal" wire:click="$set('transfer_modal', true)">
-                <i class="fa-solid fa-money-bill-transfer fa-2x"></i> 
+                <i class="fa-solid fa-money-bill-transfer"></i> 
             </x-button>
             <div id="tooltip-transfer" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip">
                 Transferir entre cuentas
@@ -130,6 +130,9 @@
                             {{$item->type == 'Cargo' ? '-' : ''}}  ${{ number_format($item->amount, 2) }}
                         </td>
                         <td class="px-6 py-4 justify-center ">
+                            <x-secondary-button class="mr-3" wire:click="edit({{$item->id}})">
+                                <i class="fa-regular fa-pen-to-square"></i>
+                            </x-secondary-button>
                             <x-danger-button class="mr-3" wire:click.prevent='deleteConfimation({{$item->id}})'>
                                 <i class="fa-solid fa-trash"></i>
                             </x-danger-button>

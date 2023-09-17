@@ -8,7 +8,7 @@
     <x-content>
         <div class="py-1 flex items-center">
             <x-button data-tooltip-target="tooltip-open" class="mr-2" wire:model="open" wire:click="$set('open', true)">
-                <i class="fa-solid fa-plus fa-2x"></i>
+                <i class="fa-solid fa-plus"></i>
             </x-button>
             <div id="tooltip-open" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip">
                 Agregar suscripción
@@ -83,6 +83,9 @@
                                 <i class="fa-solid fa-sort float-right "></i>
                             @endif
                         </th>
+                        <th scope="col" class="px-6 py-3">
+                            Acción
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -102,6 +105,14 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right">
                            $ {{ number_format($item->amount, 2) }}
+                        </td>
+                        <td class="px-6 py-4 justify-center ">
+                            <x-secondary-button class="mr-3" wire:click="edit({{$item->id}})">
+                                <i class="fa-regular fa-pen-to-square"></i>
+                            </x-secondary-button>
+                            <x-danger-button class="mr-3" wire:click.prevent='deleteConfimation({{$item->id}})'>
+                                <i class="fa-solid fa-trash"></i>
+                            </x-danger-button>
                         </td>
                     </tr>
                     @endforeach
