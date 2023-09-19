@@ -391,7 +391,11 @@ class Transactions extends Component
         
         /* Actualizar el monto disponible en cuenta */
         $account = Account::find($tr->account_id);
-        $account->updateAvailableAmount('Abono', $tr->amount);
+        if($tr->type == 'Cargo'){
+            $account->updateAvailableAmount('Abono', $tr->amount);
+        }else{
+            $account->updateAvailableAmount('Cargo', $tr->amount);
+        }
 
         /* Procedemos a eliminar */
         $tr->delete();
