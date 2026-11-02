@@ -155,20 +155,65 @@ FinanSmart/
 │   ├── css/                # Estilos base con Tailwind CSS
 │   ├── js/                 # Configuración de Alpine.js y alertas SweetAlert2
 │   └── views/              # Vistas Blade y componentes de Livewire
-└── routes/
-    ├── web.php             # Rutas web de la aplicación
-    └── api.php             # Rutas API con Sanctum
+├── routes/
+│   ├── web.php             # Rutas web de la aplicación
+│   └── api.php             # Rutas API con Sanctum
+└── tests/
+    ├── Feature/            # Pruebas funcionales de autenticación y componentes Livewire
+    └── Unit/               # Pruebas unitarias de modelos, relaciones y cálculo de saldos
 ```
 
 ---
 
 ## Pruebas Automatizadas
 
-El proyecto incluye pruebas funcionales y unitarias configuradas con PHPUnit:
+El proyecto cuenta con una suite integral de **67 pruebas automatizadas (148 aserciones)** desarrolladas con **PHPUnit** y los helpers de pruebas de **Livewire**, configuradas para ejecutarse sobre una base de datos **SQLite en memoria (`:memory:`)** para máxima velocidad e independencia del entorno.
 
-```bash
-php artisan test
-```
+### Cobertura de la Suite
+
+* **Pruebas Unitarias (`tests/Unit/`):**
+  * **`AccountTest`**: Validación de atributos, actualización dinámica de saldos (`updateAvailableAmount` para `Cargo` y `Abono`) y soporte de *Soft Deletes*.
+  * **`CategoryTest`**: Creación de categorías y borrado lógico.
+  * **`TransactionTest`**: Relaciones con cuentas y categorías, consultas optimizadas con paginación (`getAll`), búsqueda reactiva, consulta de recientes para dashboard (`getMostRecent`) y exclusión de registros eliminados.
+  * **`SubscriptionTest`**: Creación, relaciones, búsquedas paginadas y borrado lógico.
+
+* **Pruebas Funcionales / Livewire (`tests/Feature/`):**
+  * **`DashboardTest`**: Protección de rutas para usuarios invitados y renderizado del tablero con saldos de cuentas y movimientos recientes.
+  * **`SubscriptionsLivewireTest`**: Control de acceso, validación de campos obligatorios, alta de suscripciones recurrentes, carga y edición en modal, eliminación suave y ordenamiento de columnas.
+  * **`TransactionsLivewireTest`**: Validación completa de la lógica contable y operativa:
+    * Registro de gasto estándar (`Cargo`) con decremento automático del saldo de la cuenta.
+    * Edición y recálculo de balance (por diferencia de montos en la misma cuenta o traspaso entre cuentas distintas).
+    * Retiro de cajero (`saveWithdraw`): doble asiento contable (cargo en cuenta bancaria y abono en efectivo) y ajuste simultáneo de saldos.
+    * Depósito (`saveDeposit`): abono e incremento del balance.
+    * Traspaso a ahorro (`saveSavings`) y transferencias entre cuentas (`saveTransfer`).
+    * Pago programado de suscripciones (`saveSubscription`).
+    * Reversión de saldo al eliminar una transacción (`destroy`).
+  * **Autenticación y Seguridad (Jetstream):** Pruebas de registro, login, 2FA, reseteo de contraseñas y cierre de sesiones remotas.
+
+### Comandos de Ejecución
+
+* **Ejecutar toda la suite:**
+  ```bash
+  php artisan test
+  ```
+
+* **Ejecutar solo pruebas unitarias:**
+  ```bash
+  php artisan test --testsuite=Unit
+  ```
+
+* **Ejecutar solo pruebas funcionales:**
+  ```bash
+  php artisan test --testsuite=Feature
+  ```
+
+* **Ejecutar pruebas de un componente o módulo específico:**
+  ```bash
+  php artisan test --filter=TransactionsLivewireTest
+  php artisan test --filter=SubscriptionsLivewireTest
+  php artisan test --filter=DashboardTest
+  php artisan test --filter=AccountTest
+  ```
 
 ---
 

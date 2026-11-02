@@ -17,7 +17,12 @@ class Account extends Model
     protected $fillable = [
         'name',
         'description',
-        'available_amount'
+        'available_amount',
+        'is_bank_account',
+        'allows_purchases',
+        'allows_withdrawal',
+        'allows_deposits',
+        'allows_transfers',
     ];
 
     /**
