@@ -1,66 +1,177 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# FinanSmart
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> Sistema web de gestión financiera personal diseñado para el control integral y eficiente de cuentas bancarias, transacciones, transferencias y seguimiento de suscripciones recurrentes.
 
-## About Laravel
+Construido sobre el ecosistema **TALL Stack** (*Tailwind CSS, Alpine.js, Laravel, Livewire*), ofreciendo una experiencia reactiva moderna y fluida sin necesidad de separar el backend del frontend en aplicaciones independientes.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+##  Características Principales
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+* **Tablero Principal (Dashboard):**
+  * Resumen financiero con saldos de cuentas en tiempo real (efectivo, nómina, ahorros).
+  * Listado de las transacciones más recientes realizadas.
 
-## Learning Laravel
+* **Gestión de Transacciones:**
+  * Registro de transacciones con clasificación por tipo, categoría, cuenta y fecha efectiva.
+  * Soporte para diferentes tipos de operaciones:
+    * **Depósitos** (ingresos)
+    * **Retiros** (gastos)
+    * **Traspasos / Transferencias** entre cuentas
+    * **Ahorros y Suscripciones**
+  * Búsqueda en tiempo real, ordenamiento dinámico por columnas y paginación reactiva con Livewire.
+  * Borrado lógico (*Soft Deletes*) y confirmación mediante diálogos interactivos (SweetAlert2).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+* **Control de Suscripciones Periódicas:**
+  * Administración centralizada de pagos recurrentes (servicios, plataformas de streaming, gimnasio, colegiaturas, etc.).
+  * Configuración de día de corte/pago mensual, monto y cuenta de débito asociada.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+* **Cuentas y Categorización Flexible:**
+  * Configuración de permisos por cuenta (si permite retiros, depósitos o transferencias).
+  * Catálogo de categorías para clasificar gastos e ingresos (Hogar, Salud, Transporte, Servicios, etc.).
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+* **Seguridad y Control de Acceso:**
+  * Autenticación robusta provista por **Laravel Jetstream** y **Fortify**.
+  * Soporte para autenticación de dos factores (**2FA**).
+  * Gestión de sesiones activas en otros navegadores y dispositivos.
+  * Control de roles y permisos mediante **Spatie Laravel-Permission**.
+  * API tokens protegidos con **Laravel Sanctum**.
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+## Stack Tecnológico
 
-### Premium Partners
+| Capa | Tecnologías |
+| :--- | :--- |
+| **Backend** | [PHP 8.1+](https://www.php.net/), [Laravel 10](https://laravel.com/), [Livewire 2.11](https://laravel-livewire.com/) |
+| **Frontend** | [Blade](https://laravel.com/docs/blade), [Tailwind CSS 3](https://tailwindcss.com/), [Alpine.js 3](https://alpinejs.dev/) |
+| **Empaquetador** | [Vite 4](https://vitejs.dev/) |
+| **Seguridad** | [Laravel Jetstream](https://jetstream.laravel.com/), [Laravel Sanctum](https://laravel.com/docs/sanctum), [Spatie Permission](https://spatie.be/docs/laravel-permission) |
+| **Alertas & UI** | [Livewire Alert](https://github.com/jantinnerezo/livewire-alert), [SweetAlert2](https://sweetalert2.github.io/) |
+| **Base de Datos** | MySQL / MariaDB con Eloquent ORM |
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+---
 
-## Contributing
+## Requisitos Previos
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Antes de instalar el proyecto, asegúrate de tener instalado en tu entorno de desarrollo:
 
-## Code of Conduct
+* **PHP** >= 8.1 (con extensiones `pdo_mysql`, `mbstring`, `openssl`, `curl`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`)
+* **Composer** >= 2.x
+* **Node.js** >= 18.x y **NPM**
+* Servidor de base de datos **MySQL** o **MariaDB** (o un entorno local como [Laragon](https://laragon.org/) / XAMPP)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## Instalación y Configuración Local
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Sigue estos pasos para clonar y ejecutar el proyecto en tu entorno local:
 
-## License
+### 1. Clonar el repositorio
+```bash
+git clone git@github.com:octavioln/FinanSmart.git
+cd FinanSmart
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 2. Instalar dependencias del Backend (Composer)
+```bash
+composer install
+```
+
+### 3. Instalar dependencias del Frontend (NPM)
+```bash
+npm install
+```
+
+### 4. Configurar el archivo de entorno
+Copia la plantilla `.env.example` para generar tu archivo `.env`:
+```bash
+cp .env.example .env
+```
+
+Configura tus credenciales de base de datos en el archivo `.env`:
+```env
+APP_NAME=FinanSmart
+APP_URL=http://localhost:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=finansmart
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+### 5. Generar la clave de la aplicación
+```bash
+php artisan key:generate
+```
+
+### 6. Ejecutar migraciones y sembrar datos iniciales
+Ejecuta las migraciones de base de datos y carga los catálogos base (cuentas y categorías iniciales):
+```bash
+php artisan migrate
+php artisan db:seed --class=AccountSeeder
+php artisan db:seed --class=CategorySeeder
+```
+
+*(Opcional: Si configuras `DatabaseSeeder`, puedes ejecutar directamente `php artisan migrate --seed`).*
+
+### 7. Compilar activos con Vite
+* **Para desarrollo con recarga rápida (HMR):**
+  ```bash
+  npm run dev
+  ```
+* **Para generar los archivos listos para producción:**
+  ```bash
+  npm run build
+  ```
+
+### 8. Iniciar el servidor local
+Si no estás usando un host virtual de Laragon (`http://finansmart.test`), inicia el servidor embebido de PHP:
+```bash
+php artisan serve
+```
+
+Abre tu navegador en [http://localhost:8000](http://localhost:8000).
+
+---
+
+## Estructura del Proyecto
+
+```
+FinanSmart/
+├── app/
+│   ├── Actions/            # Lógica desacoplada de usuarios y autenticación (Fortify / Jetstream)
+│   ├── Http/
+│   │   ├── Livewire/       # Componentes reactivos centrales (Dashboard, Subscriptions, Transactions)
+│   │   └── Middleware/     # Middlewares HTTP
+│   └── Models/             # Modelos Eloquent (Account, Transaction, Subscription, Category, User)
+├── database/
+│   ├── migrations/         # Esquemas de base de datos
+│   └── seeders/            # Datos precargados (cuentas de prueba y categorías de gastos)
+├── public/                 # Directorio raíz público (index.php y assets compilados)
+├── resources/
+│   ├── css/                # Estilos base con Tailwind CSS
+│   ├── js/                 # Configuración de Alpine.js y alertas SweetAlert2
+│   └── views/              # Vistas Blade y componentes de Livewire
+└── routes/
+    ├── web.php             # Rutas web de la aplicación
+    └── api.php             # Rutas API con Sanctum
+```
+
+---
+
+## Pruebas Automatizadas
+
+El proyecto incluye pruebas funcionales y unitarias configuradas con PHPUnit:
+
+```bash
+php artisan test
+```
+
+---
+
+## Licencia
+
+Este proyecto se distribuye bajo la licencia **MIT**. Para más detalles, consulta el archivo [LICENSE](LICENSE) o la documentación oficial de la licencia.
