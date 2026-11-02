@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class Transaction extends Model
@@ -40,12 +41,47 @@ class Transaction extends Model
         'amount',
         'transaction_group_id',
         'operation_type',
+        'subscription_id',
+        'billing_period',
     ];
 
     protected $casts = [
         'effective_date' => 'date',
         'amount' => 'decimal:2',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $transaction) {
+            if ($transaction->subscription_id) {
+                if (blank($transaction->billing_period)) {
+                    $date = $transaction->effective_date ?? Carbon::today();
+                    $transaction->billing_period = Carbon::parse($date)->format('Y-m');
+                }
+
+                return;
+            }
+
+            $transaction->billing_period = null;
+        });
+
+        static::saved(fn (self $transaction) => $transaction->syncSubscriptionSchedule());
+        static::forceDeleted(fn (self $transaction) => $transaction->syncSubscriptionSchedule());
+        static::restored(fn (self $transaction) => $transaction->syncSubscriptionSchedule());
+
+        static::deleted(function (self $transaction) {
+            /* Libera el periodo para poder volver a registrar el pago si se elimina. */
+            if ($transaction->billing_period !== null) {
+                DB::table('transactions')
+                    ->where('id', $transaction->getKey())
+                    ->update(['billing_period' => null, 'updated_at' => now()]);
+
+                $transaction->billing_period = null;
+            }
+
+            $transaction->syncSubscriptionSchedule();
+        });
+    }
 
     public function account(): BelongsTo
     {
@@ -55,6 +91,26 @@ class Transaction extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function subscription(): BelongsTo
+    {
+        return $this->belongsTo(Subscription::class);
+    }
+
+    /**
+     * Recalcula el calendario de la suscripción vinculada al pago.
+     */
+    protected function syncSubscriptionSchedule(): void
+    {
+        if (! $this->subscription_id) {
+            return;
+        }
+
+        Subscription::query()
+            ->whereKey($this->subscription_id)
+            ->first()
+            ?->refreshSchedule();
     }
 
     /**

@@ -5,6 +5,25 @@
 </x-slot>
 <div>
     <x-content>
+        @if($dueSubscriptions->isNotEmpty())
+            <div class="mx-4 mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                <h2 class="font-semibold text-amber-800">Suscripciones vencidas o por vencer</h2>
+                <ul class="mt-2 space-y-1 text-sm text-amber-900">
+                    @foreach($dueSubscriptions as $subscription)
+                        <li>
+                            <span class="font-semibold">{{ $subscription->name }}</span>
+                            — {{ $subscription->next_payment_date->format('d/m/Y') }}
+                            ({{ $subscription->scheduleStatusLabel() }})
+                            — $ {{ number_format((float) $subscription->amount, 2) }}
+                        </li>
+                    @endforeach
+                </ul>
+                <a href="{{ route('subscriptions') }}" class="mt-2 inline-block text-sm font-semibold text-amber-800 underline">
+                    Ver suscripciones
+                </a>
+            </div>
+        @endif
+
         <h2 class="px-4">Dinero disponible</h2>
         <div class="grid gap-6 py-6 px-4 mb-8 md:grid-cols-3 xl:grid-cols-3">
             @foreach($accounts as $item)

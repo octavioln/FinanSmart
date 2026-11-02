@@ -40,6 +40,10 @@ class Subscriptions extends Component
 
     public $amount;
 
+    public $is_active = true;
+
+    public $filter = 'all';
+
     /* Inicializa el componente */
     public function mount(): void
     {
@@ -58,6 +62,7 @@ class Subscriptions extends Component
             ],
             'payment_day' => ['required', 'integer', 'between:1,31'],
             'amount' => ['required', 'numeric', 'decimal:0,2', 'gt:0', 'max:999999.99'],
+            'is_active' => ['boolean'],
         ];
     }
 
@@ -67,9 +72,23 @@ class Subscriptions extends Component
         $this->resetPage();
     }
 
+    public function updatingFilter(): void
+    {
+        $this->resetPage();
+    }
+
     /* Cambia el valor de orden de la tabla */
     public function order($sort): void
     {
+        $allowed = [
+            'id', 'name', 'account_id', 'category_id', 'payment_day', 'amount',
+            'is_active', 'last_paid_at', 'next_payment_date',
+        ];
+
+        if (! in_array($sort, $allowed, true)) {
+            return;
+        }
+
         if ($this->sort == $sort) {
             if ($this->direction == 'DESC') {
                 $this->direction = 'ASC';
@@ -102,6 +121,7 @@ class Subscriptions extends Component
             $this->$attribute = '';
         }
 
+        $this->is_active = true;
         $this->open = false;
         $this->selected_id = 0;
     }
@@ -123,7 +143,7 @@ class Subscriptions extends Component
     {
         $accounts = Account::query()->where('is_active', true)->where('allows_purchases', 1)->pluck('name', 'id');
         $categories = Category::query()->where('is_active', true)->whereNull('system_key')->pluck('name', 'id');
-        $suscriptions = Subscription::getAll($this->search, $this->sort, $this->direction);
+        $suscriptions = Subscription::getAll($this->search, $this->sort, $this->direction, $this->filter);
 
         return view('livewire.subscriptions.subscriptions', compact('suscriptions', 'accounts', 'categories'));
     }
@@ -157,6 +177,7 @@ class Subscriptions extends Component
         $this->category_id = $suscription->category_id;
         $this->payment_day = $suscription->payment_day;
         $this->amount = $suscription->amount;
+        $this->is_active = $suscription->is_active;
         $this->selected_id = $suscription->id;
         $this->open = true;
     }
@@ -205,6 +226,36 @@ class Subscriptions extends Component
         $suscription->delete();
         $this->resetUI();
         $this->dispatch('post-deleted', 'Suscripción eliminada satisfactoriamente');
+    }
+
+    /* Pausa una suscripción sin borrar su historial */
+    public function pause($id): void
+    {
+        $subscription = Subscription::find($id);
+
+        if (! $subscription) {
+            $this->alert('error', 'La suscripción seleccionada ya no existe.');
+
+            return;
+        }
+
+        $subscription->update(['is_active' => false]);
+        $this->alert('success', 'Suscripción pausada satisfactoriamente');
+    }
+
+    /* Reactiva una suscripción pausada */
+    public function resume($id): void
+    {
+        $subscription = Subscription::find($id);
+
+        if (! $subscription) {
+            $this->alert('error', 'La suscripción seleccionada ya no existe.');
+
+            return;
+        }
+
+        $subscription->update(['is_active' => true]);
+        $this->alert('success', 'Suscripción reanudada satisfactoriamente');
     }
 
     /* Verifica que la cuenta permita pagos de suscripciones. */

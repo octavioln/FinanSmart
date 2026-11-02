@@ -5,7 +5,7 @@
 
 ## 0. Estado de implementación (2026-11-02)
 
-**Fases 0 y 1 implementadas.** Cambios aplicados:
+**Fases 0, 1 y 2 implementadas.** Cambios aplicados:
 
 - Edición de `Abono` ahora revierte y reaplica el efecto correcto, incluso al cambiar de cuenta.
 - Las operaciones de dos asientos (retiro, ahorro, transferencia) comparten `transaction_group_id`; editarlas o eliminarlas afecta a todo el grupo.
@@ -22,8 +22,13 @@
 - **Fase 1:** se eliminaron los IDs fijos. `Account::cash()` / `Account::savings()` resuelven las cuentas por flags y `Category::SYSTEM_*` resuelve las categorías internas por `system_key`.
 - **Fase 1:** seeders idempotentes, `DatabaseSeeder` siembra cuentas, categorías y (si hay variables de entorno) el usuario administrador.
 - **Fase 1:** relaciones Eloquent, casts, precisión monetaria unificada en `decimal(12,2)` e índices de consulta.
+- **Fase 2:** nueva migración `2026_11_02_110000_phase_two_subscriptions.php`: `transactions.subscription_id` + `billing_period` (Y-m, índice único por suscripción) y en `subscriptions` los campos `is_active`, `last_paid_at` y `next_payment_date`, con backfill de pagos históricos.
+- **Fase 2:** el modal de pago pide el periodo explícito (sugiere el próximo pendiente) y se bloquea el doble pago con validación y con el índice único; eliminar el pago libera el periodo.
+- **Fase 2:** el calendario (`last_paid_at` / `next_payment_date`) se recalcula desde el historial mediante eventos del modelo `Transaction`; no se edita a mano en los componentes.
+- **Fase 2:** listado con próximo pago, último pago, estado (al día / por vencer / vencida / pausada), filtro activas/pausadas y acciones pausar/reanudar.
+- **Fase 2:** comando `finance:subscriptions:due --days=7` (programado a las 08:00) que solo avisa por consola/log, más un panel ámbar en el dashboard con las suscripciones vencidas o por vencer. No genera cargos automáticos.
 
-**Pendiente:** fases 2–5 (suscripciones con historial, reportes/filtros/localización, multi-usuario y CI).
+**Pendiente:** fases 3–5 (reportes/filtros/localización, multi-usuario y CI).
 
 ## 1. Resumen ejecutivo
 
@@ -216,7 +221,7 @@ Prioridad recomendada:
 - `finance:reconcile` no reporta diferencias después de los flujos principales.
 - `migrate --seed` deja la app usable en una base limpia.
 
-### Fase 2 — Suscripciones completas (2-3 días)
+### Fase 2 — Suscripciones completas (2-3 días) — implementada
 
 1. Agregar a `subscriptions`: `is_active`, `last_paid_at`, `next_payment_date` y, si se decide, `payment_transaction_id`.
 2. Al pagar una suscripción:

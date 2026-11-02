@@ -15,6 +15,18 @@
                     @endforeach
                 </select>
                 <x-input-error for="subscription_id" />
+                @if($subscription_next_payment)
+                    <p class="mt-1 text-xs text-gray-500">Último vencimiento registrado: {{ $subscription_next_payment }}</p>
+                @endif
+            </div>
+
+            <div class="mb-4">
+                <x-label value="Periodo que se paga" class="mb-2" />
+                <x-input type="month" wire:model="billing_period" class="w-full" />
+                <x-input-error for="billing_period" />
+                <p class="mt-1 text-xs text-gray-500">
+                    Se propone el próximo periodo pendiente. No se puede pagar dos veces el mismo periodo.
+                </p>
             </div>
         
             <div class="mb-4">

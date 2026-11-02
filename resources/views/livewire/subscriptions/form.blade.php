@@ -42,8 +42,19 @@
             
             <div class="mb-4">
                 <x-label value="Día de pago" class="mb-2" />
-                <x-input type="text" wire:model="payment_day" class="w-full"/>
+                <x-input type="number" min="1" max="31" inputmode="numeric" wire:model="payment_day" class="w-full"/>
                 <x-input-error for="payment_day" />
+            </div>
+
+            <div class="mb-4">
+                <label class="inline-flex items-center text-sm text-gray-700">
+                    <x-checkbox class="mr-2" wire:model="is_active" />
+                    Suscripción activa
+                </label>
+                <p class="mt-1 text-xs text-gray-500">
+                    Una suscripción pausada conserva su historial, pero no aparece para registrar pagos.
+                </p>
+                <x-input-error for="is_active" />
             </div>
 
         </x-slot>
@@ -51,7 +62,7 @@
 
         <x-slot name="footer">
 
-            <x-secondary-button class="mr-2" wire:click.prevent="resetUI()" wire:click="$set('open', false)">
+            <x-secondary-button class="mr-2" wire:click.prevent="resetUI">
                 Cancelar
             </x-secondary-button>
 

@@ -3,6 +3,7 @@
 namespace App\Http\Livewire;
 
 use App\Models\Account;
+use App\Models\Subscription;
 use App\Models\Transaction;
 use Livewire\Component;
 
@@ -34,7 +35,13 @@ class Dashboard extends Component
     {
         $accounts = Account::query()->where('is_active', true)->orderBy('id')->get();
         $transactions = Transaction::getMostRecent($this->sort, $this->direction);
+        $dueSubscriptions = Subscription::query()
+            ->active()
+            ->whereNotNull('next_payment_date')
+            ->whereDate('next_payment_date', '<=', today()->addDays(7))
+            ->orderBy('next_payment_date')
+            ->get();
 
-        return view('livewire.dashboard', compact('accounts', 'transactions'));
+        return view('livewire.dashboard', compact('accounts', 'transactions', 'dueSubscriptions'));
     }
 }

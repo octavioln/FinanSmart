@@ -6,6 +6,7 @@ use App\Models\Account;
 use App\Models\Category;
 use App\Models\Subscription;
 use App\Models\Transaction;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -71,6 +72,10 @@ class Transactions extends Component
 
     public $subscription_id;
 
+    public $billing_period;
+
+    public $subscription_next_payment;
+
     protected $listeners = [
         'deleteConfirmed' => 'destroy',
     ];
@@ -83,6 +88,7 @@ class Transactions extends Component
         $this->accounts_withdraw = Account::query()->where('is_active', true)->where('allows_withdrawal', 1)->pluck('name', 'id');
         $this->accounts_transfer = Account::query()->where('is_active', true)->where('allows_transfers', 1)->pluck('name', 'id');
         $this->subscriptions = Subscription::query()
+            ->where('is_active', true)
             ->whereHas('account', fn ($query) => $query->where('is_active', true))
             ->whereHas('category', fn ($query) => $query->where('is_active', true))
             ->pluck('name', 'id');
@@ -101,6 +107,7 @@ class Transactions extends Component
             'from_account_id' => ['nullable', 'integer', $this->activeAccountRule()],
             'to_account_id' => ['nullable', 'integer', $this->activeAccountRule()],
             'subscription_id' => ['nullable', 'integer', $this->activeSubscriptionRule()],
+            'billing_period' => ['nullable', 'date_format:Y-m'],
         ];
     }
 
@@ -157,7 +164,8 @@ class Transactions extends Component
     {
         $attributes = [
             'description', 'account_id', 'category_id', 'type', 'effective_date', 'amount',
-            'from_account_id', 'to_account_id', 'subscription_id',
+            'from_account_id', 'to_account_id', 'subscription_id', 'billing_period',
+            'subscription_next_payment',
         ];
 
         foreach ($attributes as $attribute) {
@@ -184,6 +192,29 @@ class Transactions extends Component
         }
 
         $this->validateOnly($propertyName, [$propertyName => $rules[$propertyName]]);
+    }
+
+    /* Sugiere el periodo y muestra el próximo vencimiento al elegir una suscripción. */
+    public function updatedSubscriptionId($value): void
+    {
+        $this->subscription_next_payment = null;
+
+        if (! $value) {
+            $this->billing_period = '';
+
+            return;
+        }
+
+        $subscription = Subscription::find($value);
+
+        if (! $subscription) {
+            $this->billing_period = '';
+
+            return;
+        }
+
+        $this->billing_period = $subscription->billingPeriodForNextPayment();
+        $this->subscription_next_payment = $subscription->next_payment_date?->format('d/m/Y');
     }
 
     /* Renderiza la vista */
@@ -575,33 +606,67 @@ class Transactions extends Component
         $validatedData = $this->validate([
             'subscription_id' => ['required', 'integer', $this->activeSubscriptionRule()],
             'effective_date' => ['required', 'date'],
+            'billing_period' => ['required', 'date_format:Y-m'],
         ]);
 
-        DB::transaction(function () use ($validatedData) {
-            $subscription = Subscription::find($validatedData['subscription_id']);
+        try {
+            DB::transaction(function () use ($validatedData) {
+                $subscription = Subscription::query()
+                    ->whereKey($validatedData['subscription_id'])
+                    ->lockForUpdate()
+                    ->first();
 
-            if (! $subscription) {
+                if (! $subscription || ! $subscription->is_active) {
+                    throw ValidationException::withMessages([
+                        'subscription_id' => 'La suscripción seleccionada ya no existe o está pausada.',
+                    ]);
+                }
+
+                $category = Category::query()
+                    ->whereKey($subscription->category_id)
+                    ->where('is_active', true)
+                    ->first();
+
+                if (! $category) {
+                    throw ValidationException::withMessages([
+                        'subscription_id' => 'La categoría de la suscripción está archivada. Actualiza la suscripción antes de pagarla.',
+                    ]);
+                }
+
+                if ($subscription->hasPaidPeriod($validatedData['billing_period'])) {
+                    throw ValidationException::withMessages([
+                        'billing_period' => 'Ya registraste un pago de esta suscripción para ese periodo.',
+                    ]);
+                }
+
+                $account = $this->lockedAccount($subscription->account_id);
+                $this->ensureAccountAllows($account, 'allows_purchases', 'subscription_id', 'La cuenta de la suscripción no permite pagos.');
+                $this->ensureSufficientFunds($account, $subscription->amount, 'subscription_id');
+
+                Transaction::create([
+                    'description' => $subscription->name,
+                    'account_id' => $subscription->account_id,
+                    'category_id' => $subscription->category_id,
+                    'type' => Transaction::TYPE_CARGO,
+                    'effective_date' => $validatedData['effective_date'],
+                    'amount' => $subscription->amount,
+                    'operation_type' => Transaction::OPERATION_SUBSCRIPTION,
+                    'subscription_id' => $subscription->id,
+                    'billing_period' => $validatedData['billing_period'],
+                ]);
+
+                $account->applyTransactionEffect(Transaction::TYPE_CARGO, $subscription->amount);
+            });
+        } catch (QueryException $exception) {
+            if (str_contains(strtolower($exception->getMessage()), 'unique')
+                || str_contains(strtolower($exception->getMessage()), 'duplicate')) {
                 throw ValidationException::withMessages([
-                    'subscription_id' => 'La suscripción seleccionada ya no existe.',
+                    'billing_period' => 'Ya registraste un pago de esta suscripción para ese periodo.',
                 ]);
             }
 
-            $account = $this->lockedAccount($subscription->account_id);
-            $this->ensureAccountAllows($account, 'allows_purchases', 'subscription_id', 'La cuenta de la suscripción no permite pagos.');
-            $this->ensureSufficientFunds($account, $subscription->amount, 'subscription_id');
-
-            Transaction::create([
-                'description' => $subscription->name,
-                'account_id' => $subscription->account_id,
-                'category_id' => $subscription->category_id,
-                'type' => Transaction::TYPE_CARGO,
-                'effective_date' => $validatedData['effective_date'],
-                'amount' => $subscription->amount,
-                'operation_type' => Transaction::OPERATION_SUBSCRIPTION,
-            ]);
-
-            $account->applyTransactionEffect(Transaction::TYPE_CARGO, $subscription->amount);
-        });
+            throw $exception;
+        }
 
         $this->resetUI();
         $this->alert('success', 'Pago de suscripción registrado.');
@@ -734,7 +799,9 @@ class Transactions extends Component
     /* Regla para suscripciones activas. */
     protected function activeSubscriptionRule()
     {
-        return Rule::exists('subscriptions', 'id')->whereNull('deleted_at');
+        return Rule::exists('subscriptions', 'id')
+            ->whereNull('deleted_at')
+            ->where('is_active', true);
     }
 
     /* Devuelve una categoría interna configurada por su clave. */

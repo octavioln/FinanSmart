@@ -12,7 +12,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Envía el aviso diario de suscripciones vencidas o por vencer.
+        // Requiere que el servidor ejecute `php artisan schedule:run` cada minuto.
+        $schedule->command('finance:subscriptions:due')->dailyAt('08:00');
     }
 
     /**
