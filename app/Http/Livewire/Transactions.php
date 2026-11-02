@@ -381,7 +381,7 @@ class Transactions extends Component
     public function deleteConfimation($id)
     {
         $this->selected_id  = $id;
-        $this->dispatchBrowserEvent('show-alert');
+        $this->dispatch('show-alert');
     }
 
     public function destroy()

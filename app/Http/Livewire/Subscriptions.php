@@ -158,7 +158,7 @@ class Subscriptions extends Component
     public function deleteConfimation($id)
     {
         $this->selected_id = $id;
-        $this->dispatchBrowserEvent('show-alert');
+        $this->dispatch('show-alert');
     }
 
     /* Elimina el registro */
@@ -167,6 +167,6 @@ class Subscriptions extends Component
         $suscription = Subscription::find($this->selected_id);
         $suscription->delete();
         $this->resetUI();
-        $this->dispatchBrowserEvent('post-deleted', 'Suscripción eliminada satisfactoriamente');
+        $this->dispatch('post-deleted', 'Suscripción eliminada satisfactoriamente');
     }
 }
