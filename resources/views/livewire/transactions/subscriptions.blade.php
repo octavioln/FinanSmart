@@ -9,7 +9,7 @@
             <div class="mb-4">
                 <x-label value="Suscripción" class="mb-2" />
                 <select wire:model="subscription_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                    <option value="" seledted>Seleccione</option>
+                    <option value="" selected>Seleccione</option>
                     @foreach($subscriptions as $key => $subscription)
                     <option value="{{$key}}">{{$subscription}}</option>
                     @endforeach

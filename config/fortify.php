@@ -132,7 +132,9 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Registro deshabilitado: los datos financieros son globales y no deben
+        // quedar expuestos a cualquier visitante que cree una cuenta.
+        // Features::registration(),
         Features::resetPasswords(),
         // Features::emailVerification(),
         Features::updateProfileInformation(),

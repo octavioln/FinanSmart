@@ -83,4 +83,28 @@ class SubscriptionTest extends TestCase
 
         $this->assertSoftDeleted('subscriptions', ['id' => $subscription->id]);
     }
+
+    public function test_get_all_excludes_soft_deleted_subscriptions(): void
+    {
+        $account = Account::factory()->create();
+        $category = Category::factory()->create();
+
+        Subscription::factory()->create([
+            'name' => 'Suscripción activa',
+            'account_id' => $account->id,
+            'category_id' => $category->id,
+        ]);
+
+        $deleted = Subscription::factory()->create([
+            'name' => 'Suscripción eliminada',
+            'account_id' => $account->id,
+            'category_id' => $category->id,
+        ]);
+        $deleted->delete();
+
+        $results = Subscription::getAll('', 'id', 'DESC');
+
+        $this->assertCount(1, $results);
+        $this->assertEquals('Suscripción activa', $results->first()->name);
+    }
 }

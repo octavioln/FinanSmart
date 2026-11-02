@@ -9,7 +9,7 @@
             <div class="mb-4">
                 <x-label value="Cuenta origen" class="mb-2" />
                 <select wire:model="from_account_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                    <option value="" seledted>Seleccione</option>
+                    <option value="" selected>Seleccione</option>
                     @foreach($accounts_transfer as $key => $account)
                         @if($key != $to_account_id || $from_account_id == $key )
                             <option value="{{$key}}">{{$account}}</option>
@@ -22,7 +22,7 @@
             <div class="mb-4">
                 <x-label value="Cuenta destino" class="mb-2" />
                 <select wire:model="to_account_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                    <option value="" seledted>Seleccione</option>
+                    <option value="" selected>Seleccione</option>
                     @foreach($accounts_transfer as $key => $account)
                         @if($key != $from_account_id || $to_account_id == $key) 
                             <option value="{{$key}}">{{$account}}</option>
@@ -34,7 +34,7 @@
 
             <div class="mb-4">
                 <x-label value="Monto" class="mb-2" />
-                <x-input type="text" wire:model="amount" class="w-full"/>
+                <x-input type="number" step="0.01" min="0.01" inputmode="decimal" wire:model="amount" class="w-full"/>
                 <x-input-error for="amount" />
             </div>
         

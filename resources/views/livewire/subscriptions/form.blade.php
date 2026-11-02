@@ -15,7 +15,7 @@
             <div class="mb-4">
                 <x-label value="Categoría" class="mb-2" />
                 <select wire:model="category_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                    <option value="" seledted>Seleccione</option>
+                    <option value="" selected>Seleccione</option>
                     @foreach($categories as $key => $category)
                     <option value="{{$key}}">{{$category}}</option>
                     @endforeach
@@ -25,14 +25,14 @@
 
             <div class="mb-4">
                 <x-label value="Monto" class="mb-2" />
-                <x-input type="text" wire:model="amount" class="w-full"/>
+                <x-input type="number" step="0.01" min="0.01" inputmode="decimal" wire:model="amount" class="w-full"/>
                 <x-input-error for="amount" />
             </div>
 
             <div class="mb-4">
                 <x-label value="Forma de pago" class="mb-2" />
                 <select wire:model="account_id" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                    <option value="" seledted>Seleccione</option>
+                    <option value="" selected>Seleccione</option>
                     @foreach($accounts as $key => $account)
                     <option value="{{$key}}">{{$account}}</option>
                     @endforeach

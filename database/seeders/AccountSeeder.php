@@ -2,45 +2,56 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Account;
+use Illuminate\Database\Seeder;
 
 class AccountSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     *
+     * Es idempotente: usa el nombre como clave natural y no sobrescribe saldos.
      */
     public function run(): void
     {
-        Account::create([
-            "name" => 'Efectivo',
-            "description" => "Dinero en mano",
-            "is_bank_account" => 0,
-            "allows_purchases" => 1,
-            "allows_withdrawal" => 0,
-            "allows_deposits" => 1,
-            "allows_transfers" => 0,
-        ]);
+        $accounts = [
+            [
+                'name' => 'Efectivo',
+                'description' => 'Dinero en mano',
+                'is_bank_account' => false,
+                'is_cash' => true,
+                'is_savings' => false,
+                'allows_purchases' => true,
+                'allows_withdrawal' => false,
+                'allows_deposits' => true,
+                'allows_transfers' => false,
+            ],
+            [
+                'name' => 'Nómina',
+                'description' => 'Tarjeta de nómina',
+                'is_bank_account' => true,
+                'is_cash' => false,
+                'is_savings' => false,
+                'allows_purchases' => true,
+                'allows_withdrawal' => true,
+                'allows_deposits' => true,
+                'allows_transfers' => true,
+            ],
+            [
+                'name' => 'Ahorro',
+                'description' => 'Cuenta de ahorros',
+                'is_bank_account' => true,
+                'is_cash' => false,
+                'is_savings' => true,
+                'allows_purchases' => false,
+                'allows_withdrawal' => false,
+                'allows_deposits' => true,
+                'allows_transfers' => true,
+            ],
+        ];
 
-        Account::create([
-            "name" => 'Nómina',
-            "description" => "Tarjeta de nómina",
-            "is_bank_account" => 1,
-            "allows_purchases" => 1,
-            "allows_withdrawal" => 1,
-            "allows_deposits" => 1,
-            "allows_transfers" => 1,
-        ]);
-
-        Account::create([
-            "name" => 'Ahorro',
-            "description" => "Cuenta de ahorros",
-            "is_bank_account" => 1,
-            "allows_purchases" => 0,
-            "allows_withdrawal" => 0,
-            "allows_deposits" => 1,
-            "allows_transfers" => 1,
-        ]);
+        foreach ($accounts as $account) {
+            Account::firstOrCreate(['name' => $account['name']], $account);
+        }
     }
 }

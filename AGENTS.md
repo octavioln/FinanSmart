@@ -18,16 +18,19 @@ FinanSmart is a Spanish-language personal-finance app built on Laravel 12 + Live
 
 ## Commands
 
-- Full suite (SQLite `:memory:` configured in `phpunit.xml`): `& $php artisan test`. Current baseline: 67 passed, 7 skipped, 161 assertions.
+- Full suite (SQLite `:memory:` configured in `phpunit.xml`): `& $php artisan test`. Current baseline: 113 passed, 8 skipped, 331 assertions.
 - One suite: `& $php artisan test --testsuite=Unit` (or `Feature`)
 - One class: `& $php artisan test --filter=TransactionsLivewireTest`
 - Format changed files: `& $php vendor/bin/pint --dirty`; check-only with `--test`. There is no CI and no composer lint/test script.
-- Database setup: `& $php artisan migrate`, then seed **explicitly**:
+- Reconcile balances: `& $php artisan finance:reconcile`; add `--fix` to set `available_amount` to the calculated balance. It compares each account's `opening_balance` plus its non-deleted transactions.
+- Database setup: `& $php artisan migrate --seed` (or `& $php artisan db:seed`). `DatabaseSeeder` calls `AccountSeeder`, `CategorySeeder`, and `AdminUserSeeder`. Account and category seeders are idempotent (`firstOrCreate` by name) and preserve existing balances; the admin seeder only creates a user when `ADMIN_EMAIL` and `ADMIN_PASSWORD` are set.
+- Public registration is disabled. To create the first user (or a new one) on a fresh database:
   ```powershell
-  & $php artisan db:seed --class=AccountSeeder
-  & $php artisan db:seed --class=CategorySeeder
+  $env:ADMIN_EMAIL="tu@correo.com"
+  $env:ADMIN_PASSWORD="una-contraseña-segura"
+  & $php artisan db:seed --class=AdminUserSeeder
   ```
-  `DatabaseSeeder` is empty, so `migrate --seed` and plain `db:seed` create no accounts or categories. The seeders use `create()` and are not idempotent; do not re-run them on an already-seeded database.
+  `AdminUserSeeder` is idempotent by email and does not overwrite an existing user.
 - Serve locally with `& $php artisan serve` (or the Laragon virtual host).
 
 ## Architecture and business rules
@@ -35,13 +38,16 @@ FinanSmart is a Spanish-language personal-finance app built on Laravel 12 + Live
 - Livewire components live in `app/Http/Livewire` (namespace `App\Http\Livewire`, set in `config/livewire.php`), with views in `resources/views/livewire`; routes in `routes/web.php` bind component classes directly. Auth is Jetstream/Fortify/Sanctum (`app/Actions/Fortify`, `app/Actions/Jetstream`); there are no finance controllers, FormRequests, or policies.
 - Keep the legacy Laravel 10 skeleton: `bootstrap/app.php` binds `app/Http/Kernel.php` and `app/Console/Kernel.php`, even though the locked framework is Laravel 12. Do not apply Laravel 11/12 skeleton patterns (such as moving middleware into `bootstrap/app.php`) without a deliberate migration.
 - Finance data is global, not scoped per user: `accounts`, `categories`, `transactions`, and `subscriptions` have no `user_id`. Authentication only gates the pages; do not assume `auth()->id()` filtering exists.
-- Account balances are denormalized in `accounts.available_amount`. Mutate them only through `Account::updateAvailableAmount('Cargo'|'Abono', $amount)`; the strings are exact and any other value silently no-ops. Multi-entry flows (cash withdrawal, savings, transfer) create two transactions and update both accounts; deleting a transaction reverses its type.
-- Seeded IDs are hard-coded in `Transactions`: account 1 = Efectivo/cash, 2 = Nómina, 3 = Ahorro/savings; category 8 = Ahorro, 18 = Traspaso, 19 = Depósito. Reordering or inserting seed rows before these breaks `saveWithdraw`, `saveSavings`, `saveTransfer`, and deposit logic. `Subscriptions` also excludes category IDs 18 and 19 from its category dropdown.
-- `Transaction::getAll()` / `getMostRecent()` use the query builder and manually filter `deleted_at`. `Subscription::getAll()` also uses the query builder but omits that filter, so soft-deleted subscriptions still appear in the table. Preserve or fix each behavior deliberately.
-- `Transactions::save()` always forces `type = 'Cargo'`; the other operation types have dedicated methods: `saveWithdraw` (cash account 1), `saveDeposit` (category 19), `saveSavings` (savings account 3, categories 8/19), `saveTransfer` (category 18), and `saveSubscription` (copies the subscription's account, category, and amount). New user-facing copy should be Spanish, matching the rest of the UI.
+- Account balances are denormalized in `accounts.available_amount`. Mutate them only through `Account::updateAvailableAmount('Cargo'|'Abono', $amount)` or `Account::applyTransactionEffect($type, $amount, $reverse)`; the strings are exact and any other value silently no-ops. The effect is applied atomically with a SQL update. Multi-entry flows (cash withdrawal, savings, transfer) create two transactions sharing `transactions.transaction_group_id` and `operation_type`; edit/delete always operates on the whole group inside `DB::transaction()`. Single-entry rows have `transaction_group_id = null`.
+- Accounts carry an explicit `opening_balance`; `available_amount` starts equal to it and then reflects movements. A new account should always be created with both fields consistent. Changing `opening_balance` from the UI adjusts `available_amount` by the difference and is rejected if the result would be negative.
+- Special accounts are resolved by flags, not IDs: `Account::cash()` for ATM withdrawals and `Account::savings()` for savings transfers. The accounts UI keeps at most one active `is_cash` and one active `is_savings` account.
+- Internal categories are resolved by `categories.system_key` (`Category::SYSTEM_SAVINGS`, `SYSTEM_TRANSFER`, `SYSTEM_DEPOSIT`), not by IDs 8/18/19. Purchases and subscriptions only accept active categories with `system_key = null`; edit flows preserve an existing internal category.
+- `accounts.is_active` and `categories.is_active` represent archiving. Archived records stay available for historical transactions but disappear from operation dropdowns. Prefer archiving over soft deletion; the UI blocks archiving the configured cash/savings accounts and records that still have subscriptions.
+- `Transaction::getAll()` / `getMostRecent()` and `Subscription::getAll()` use the query builder, manually filter `t.deleted_at`/`s.deleted_at` plus soft-deleted accounts/categories, and whitelist the sort column/direction. Keep those guards when adding new queries.
+- `Transactions::save()` always forces `type = 'Cargo'`; the other operation types have dedicated methods: `saveWithdraw` (`Account::cash()`), `saveDeposit` (`Category::SYSTEM_DEPOSIT`), `saveSavings` (`Account::savings()`, savings/deposit categories), `saveTransfer` (`Category::SYSTEM_TRANSFER`), and `saveSubscription` (copies the subscription's account, category, and amount). New user-facing copy should be Spanish, matching the rest of the UI.
 
 ## Test notes
 
-- Tests use `RefreshDatabase` and SQLite `:memory:`. Only `TransactionsLivewireTest` seeds `AccountSeeder` + `CategorySeeder` in `setUp` and relies on the fixed IDs above; `SubscriptionsLivewireTest` and the unit tests use model factories instead.
-- Current suite: 67 passing, 7 skipped, 161 assertions. The 7 skips are Jetstream/Fortify features that are disabled: API tokens (3), email verification (3), and the registration-disabled case (1). Account deletion and 2FA are enabled; teams are not enabled, so do not assume team scoping.
+- Tests use `RefreshDatabase` and SQLite `:memory:`. `TransactionsLivewireTest`, `AccountsLivewireTest`, and `CategoriesLivewireTest` seed `AccountSeeder` + `CategorySeeder` in `setUp`; the accounting tests no longer depend on id 1/3 for cash/savings because those are resolved by flags. `SubscriptionsLivewireTest` and the unit tests use model factories instead.
+- Current suite: 113 passing, 8 skipped, 331 assertions. The 8 skips are Jetstream/Fortify features that are disabled: API tokens (3), email verification (3), and public registration (2). Account deletion and 2FA are enabled; teams are not enabled, so do not assume team scoping. Public registration is intentionally disabled because finance data is global.
 - With a stale Livewire 2 vendor tree, `$this->dispatch` is unavailable and Livewire tests fail; reinstall dependencies (`composer install`, not `update`) to get Livewire 3.

@@ -51,4 +51,29 @@ class DashboardTest extends TestCase
             ->assertSee('Cuenta Principal')
             ->assertSee('Compra de despensa');
     }
+
+    public function test_can_change_sort_order(): void
+    {
+        $user = User::factory()->create();
+
+        $account = Account::factory()->create();
+        $category = Category::factory()->create();
+
+        Transaction::factory()->create([
+            'account_id' => $account->id,
+            'category_id' => $category->id,
+        ]);
+
+        $this->actingAs($user);
+
+        Livewire::test(Dashboard::class)
+            ->assertSet('sort', 'id')
+            ->assertSet('direction', 'DESC')
+            ->call('order', 'amount')
+            ->assertSet('sort', 'amount')
+            ->assertSet('direction', 'ASC')
+            ->call('order', 'amount')
+            ->assertSet('direction', 'DESC')
+            ->assertStatus(200);
+    }
 }

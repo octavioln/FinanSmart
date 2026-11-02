@@ -5,22 +5,20 @@
 </x-slot>
 <div>
     <x-content>
-        <h2 class=" px-4"> Dinero disponible</h1>
+        <h2 class="px-4">Dinero disponible</h2>
         <div class="grid gap-6 py-6 px-4 mb-8 md:grid-cols-3 xl:grid-cols-3">
             @foreach($accounts as $item)
                 <x-card type="info">
                     <x-slot name="logo">
-                        @switch($item->id)
-                        @case(1)
+                        @if($item->is_cash)
                             <i class="fa-solid fa-money-bills"></i>
-                        @break
-                        @case(2)
-                            <i class="fa-solid fa-credit-card"></i>
-                        @break
-                        @case(3)
+                        @elseif($item->is_savings)
                             <i class="fa-solid fa-piggy-bank"></i>
-                        @break
-                        @endswitch
+                        @elseif($item->is_bank_account)
+                            <i class="fa-solid fa-credit-card"></i>
+                        @else
+                            <i class="fa-solid fa-wallet"></i>
+                        @endif
                     </x-slot>
                     <x-slot name="title">
                         {{$item->name}}
@@ -33,7 +31,7 @@
             @endforeach
         </div>
 
-        <h2 class="px-4"> Transacciones más recientes</h1>
+        <h2 class="px-4">Transacciones más recientes</h2>
         @if ($transactions->count())
         <div class="py-4 relative overflow-x-auto">
             <table class="w-full text-sm text-left text-gray-500">
@@ -47,6 +45,7 @@
                         </th>
                         <th scope="col" class="cursor-pointer px-6 py-3" wire:click="order('category_id')">
                             Categoría
+                        </th>
                         <th scope="col" class="px-6 py-3">
                             Cuenta
                         </th>
