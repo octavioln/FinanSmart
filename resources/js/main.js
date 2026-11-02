@@ -13,7 +13,7 @@ window.addEventListener('show-alert', event =>{
 
     }).then(function(result){
         if(result.value){
-            Livewire.emit('deleteConfirmed')
+            Livewire.dispatch('deleteConfirmed')
         }
     })
 });

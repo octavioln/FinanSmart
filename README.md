@@ -43,7 +43,7 @@ Construido sobre el ecosistema **TALL Stack** (*Tailwind CSS, Alpine.js, Laravel
 
 | Capa | Tecnologías |
 | :--- | :--- |
-| **Backend** | [PHP 8.1+](https://www.php.net/), [Laravel 10](https://laravel.com/), [Livewire 2.11](https://laravel-livewire.com/) |
+| **Backend** | [PHP 8.2+](https://www.php.net/), [Laravel 12](https://laravel.com/), [Livewire 3](https://laravel-livewire.com/) |
 | **Frontend** | [Blade](https://laravel.com/docs/blade), [Tailwind CSS 3](https://tailwindcss.com/), [Alpine.js 3](https://alpinejs.dev/) |
 | **Empaquetador** | [Vite 4](https://vitejs.dev/) |
 | **Seguridad** | [Laravel Jetstream](https://jetstream.laravel.com/), [Laravel Sanctum](https://laravel.com/docs/sanctum), [Spatie Permission](https://spatie.be/docs/laravel-permission) |
@@ -56,7 +56,7 @@ Construido sobre el ecosistema **TALL Stack** (*Tailwind CSS, Alpine.js, Laravel
 
 Antes de instalar el proyecto, asegúrate de tener instalado en tu entorno de desarrollo:
 
-* **PHP** >= 8.1 (con extensiones `pdo_mysql`, `mbstring`, `openssl`, `curl`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`)
+* **PHP** >= 8.2 (con extensiones `pdo_mysql`, `mbstring`, `openssl`, `curl`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`)
 * **Composer** >= 2.x
 * **Node.js** >= 18.x y **NPM**
 * Servidor de base de datos **MySQL** o **MariaDB** (o un entorno local como [Laragon](https://laragon.org/) / XAMPP)

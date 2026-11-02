@@ -16,7 +16,7 @@
             </div>
         </div>
         <div class="py-3 flex items-center">
-            <x-input class="flex-1 mr-2" type="text" wire:model='search' placeholder="Buscar..." />
+            <x-input class="flex-1 mr-2" type="text" wire:model.live.debounce.300ms='search' placeholder="Buscar..." />
         </div>
         @if ($suscriptions->count())
         <div class="relative overflow-x-auto">
